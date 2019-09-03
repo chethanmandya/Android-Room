@@ -94,7 +94,6 @@ data class Venue(
 ) : Serializable {
 
 }
-
 ```
 
 
@@ -103,14 +102,87 @@ Data Access Objects are the main classes where you define your database interact
 
 Below code snippet shows how to define an Dao class for your venu entity
 
+```kotlin
+@Dao
+@OpenForTesting
+abstract class VenueDao {
 
-https://github.com/chethu/Near-by-venus-browsing-sample-with-Android-Architecture-Components/blob/7a08e4c3bd52387c608596f7c89e41b880935b81/app/src/main/java/com/chethan/abn/db/VenueDao.kt#L14-L60
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun insertVenue(vararg repos: Venue)
+
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun insertVenues(repositories: List<Venue>)
+
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun insert(result: VenuesSearchResult)
+
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    abstract fun createVenueIfNotExists(venue: Venue): Long
+
+
+    @Delete
+    abstract fun delete(item: Venue)
+
+
+    @Query("DELETE FROM Venue")
+    abstract fun deleteAll()
+
+
+    @Query("SELECT * FROM Venue")
+    abstract fun loadAllTheVenue(): LiveData<List<Venue>>
+
+
+    @Query("SELECT * FROM VenuesSearchResult WHERE `query` = :query")
+    abstract fun search(query: String): LiveData<VenuesSearchResult>
+
+
+    fun loadOrdered(repoIds: List<String>): LiveData<List<Venue>> {
+        val order = SparseIntArray()
+        repoIds.withIndex().forEach {
+            order.put(it.index, it.index)
+        }
+        return Transformations.map(loadById(repoIds)) { repositories ->
+
+
+            repositories
+        }
+    }
+
+
+    @Query("SELECT * FROM Venue WHERE id in (:venueIds)")
+    abstract fun loadById(venueIds: List<String>): LiveData<List<Venue>>
+
+
+    @Query("SELECT * FROM VenuesSearchResult WHERE `query` = :query")
+    abstract fun findSearchResult(query: String): VenuesSearchResult?
+
+}
+```
 
 
 #### @Database
 
 
+```kotlin
+@Database(
+    entities = [
+        VenuesSearchResult::class,
+        VenueDetails::class,
+        VenuePhotos::class,
+        Venue::class],
+    version = 1,
+    exportSchema = false
+)
 
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun venueDao(): VenueDao
+    abstract fun venueDetailsDao(): VenueDetailsDao
+}
+```
 
 ####  @Embedded
 
