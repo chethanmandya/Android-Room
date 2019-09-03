@@ -103,7 +103,9 @@ Data Access Objects are the main classes where you define your database interact
 
 Below code snippet shows how to define an Dao class for your venu entity
 
+
 https://github.com/chethu/Near-by-venus-browsing-sample-with-Android-Architecture-Components/blob/7a08e4c3bd52387c608596f7c89e41b880935b81/app/src/main/java/com/chethan/abn/db/VenueDao.kt#L14-L60
+
 
 #### @Database
 
