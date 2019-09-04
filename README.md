@@ -316,19 +316,22 @@ object VenueTypeConverters {
 
 Another example : 
 
-public class Converters {
-   @TypeConverter
-   public static ArrayList<String> fromString(String value) {
-      Type listType = new TypeToken<ArrayList<String>>() {}.getType();
-      return new Gson().fromJson(value, listType);
-   }
-   @TypeConverter
-   public static String fromArrayList(ArrayList<String> list) {
-      Gson gson = new Gson();
-      String json = gson.toJson(list);
-      return json;
-   }
+object Converters {
+        @TypeConverter
+        fun fromString(value: String): ArrayList<String> {
+                val listType = object : TypeToken<ArrayList<String>>() {
+
+                }.getType()
+                return Gson().fromJson<Any>(value, listType)
+        }
+
+        @TypeConverter
+        fun fromArrayList(list: ArrayList<String>): String {
+                val gson = Gson()
+                return gson.toJson(list)
+        }
 }
+
 ```
 
 Public static String fromArrayList(ArrayList<String> list) : 
