@@ -1,14 +1,13 @@
 
 #### What is Room ? 
-Room is a persistence library, it is part of jetpack. library takes care most of complicated stuff that we previously had to do ourselves, we will write much less boilerplate code to create tables and make database operations.
+The Room persistence library provides an abstraction layer over SQLite. library takes care most of complicated stuff that we previously had to do ourselves, we will write much less boilerplate code to create tables and make database operations.
 
-It makes it easier to work with SQLiteDatabase objects in your app, decreasing the amount of boilerplate code and verifying SQL queries at compile time
 
 
 ### Sqlite in android is not that cool 
 - You need to write out a boilerplate code to convert between your java object and your sqlite object. 
 - It doesn't have compile time safety, if you building sqlite query and if you forgot to add comma, you going to get run time crash, that makes you very hard to test all those cases you put. 
-- When you are writing reactive application and you want to observe the databases changes to UI , sqlite doesn't facilitate to do that. 
+- When you are writing reactive application and you want to observe the databases changes to UI , sqlite doesn't facilitate to do that but Room is built to work with LiveData and RxJava for data observation.  
 
 I am not going to go too much on theoretical knowledge, if you have already used any of those sql wrapper like ORMLight, Realm, you will understand the advantages and disadvantages of having Room over any other library. Let me step into an example to make you understand how to use the room and its features. 
 
