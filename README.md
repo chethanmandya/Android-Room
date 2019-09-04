@@ -6,11 +6,11 @@ It makes it easier to work with SQLiteDatabase objects in your app, decreasing t
 
 
 ### Sqlite in android is not that cool 
-- You need to write out a biolerplate code to convert between your java object and your sqlite object. 
+- You need to write out a boilerplate code to convert between your java object and your sqlite object. 
 - It doesn't have compile time safety, if you building sqlite query and if you forgot to add comma, you going to get run time crash, that makes you very hard to test all those cases you put. 
-- When you are writing reactive application and you want to observe the databases changes to UI , sqlite doesn't facilate to do that. 
+- When you are writing reactive application and you want to observe the databases changes to UI , sqlite doesn't facilitate to do that. 
 
-I am not going to go too much on theoritical knowledge, if you have already used any of those sql wrapper like ORMLight, Realm, you will understand advantagious and disadvantgious of having Room over any other library. Let me step into an example where you can understand how to use room and its feature. 
+I am not going to go too much on theoretical knowledge, if you have already used any of those sql wrapper like ORMLight, Realm, you will understand the advantages and disadvantages of having Room over any other library. Let me step into an example to make you understand how to use the room and its features. 
 
 There are 3 major components in Room:
  - Database: Contains the database holder and serves as the main access point for the underlying connection to your app's persisted, relational data.
@@ -18,7 +18,7 @@ There are 3 major components in Room:
  - DAO: Contains the methods used for accessing the database.
 
 
-Below example is json response of near by venues which are available on foresquare apis. Assume your response look like as below. 
+Below example is json response gives you nearby venues which are available on foursquare apis. Assume your response look like as below. 
 
 ```kotlin
  "venues": [
@@ -71,7 +71,7 @@ Room creates a table for each class annotated with @Entity; the fields in the cl
  
 Keeping only what we needed
  
-It is really not necessary to have all of the information of venue object which comes venue response, Creating a User Minimal object that holds only the data needed will improve the amount of memory used by the app. it is always recommended to load only the subset of fields what is needed for UI, that will improve the speed of the queries by reducing the IO cost. Hence I have consider below fields in the venue table.
+It is really not necessary to have all of the information of venue object which comes venue response, Creating a User Minimal object that holds only the data needed will improve the amount of memory used by the app. it is always recommended to load only the subset of fields what is needed for UI, that will improve the speed of the queries by reducing the IO cost. Hence I have considered below fields in the venue table.
 
 The following code snippet shows how to define an entity:
 
@@ -101,8 +101,7 @@ data class Venue(
 
 ### @Dao 
 DAOs are responsible for defining the methods that access the database.
-
-Below code snippet shows how to define an Dao class for your venu entity
+Below code snippet shows how to define a Dao class for venu entity
 
 ```kotlin
 @Dao
@@ -190,7 +189,7 @@ abstract class AppDatabase : RoomDatabase() {
 
 ####  @Embedded
 
-When you annotated field as Embedded, all of those nested field of annotated field will be referred as separate column in the same Entity. 
+When you annotated field as Embedded, all of those nested field of annotated field will be created as a separate column in the same Entity. 
 
 Here location field has `address`, `lat` and `lng` nested field, all of those filed will be created as separated column in same entity Venue. 
 
@@ -219,11 +218,13 @@ data class Venue(
 ```
 #### foreignKeys
 
-if suppose, your field has array list as one of the sub field then you will save this field either by foreign key relation OR by type converters. 
+if suppose, your field has an array list as one of the sub field then in that case you will save this field either by foreign key relation OR by type converters. 
 
-you will go for making it as foreign key relation when it has very complex structure, structure which has nested list within list. or else you go for type convertor when it has only list of objects, like list of premitive type. 
+You will go for making it as foreign key relation when it has very complex structure, structure which has nested list. or you can save them using type convertor when it has only list of objects, like list of primitive type. 
 
-In the below example, VenuDetails has a field called Photos, The Photos has nested list, it is a relation 1 to Many. To map this type of relation we will use the @ForeignKey annotation. 
+When you have more than one nested list, it is better to save them in foreign key relationship because type convertor is not best suitable, it will slow down performance because of too many traverses in the list while converting user object to primitive and vice versa. 
+
+In the below example, Venue Details has a field called Photos, The Photos has nested list, it is a relation of 1 to Many. To map this type of relation we will use the @ForeignKey annotation. 
 
 ``` kotlin 
 
@@ -263,7 +264,7 @@ data class VenueDetails(
 }
 
 ```
-Below entity of VenuePhotos saves the Photo object information which we have igrnored in VenueDetails. You can have your own version of entity to save Photo object element like "url". it is really not necessary to have complete Photo object with all other field when you are not using in the app. you can see we have consider parent entity as VenuDetails and child entity as VenuePhotos. we are linking by using parent column id in the Venue and Child column venuId. 
+Below entity of VenuePhotos saves the Photo object information which we have ignored in VenueDetails. You can have your own version of entity to save Photo object element like "url". it is really not necessary to have complete Photo object with all other field when you are not using in the app. you can see in the below snappet we have considered parent entity as Venue Details and child entity as VenuePhotos. we are linking these two entities together by using parent column id in Venue and venueId child column id from VenuePhotos
 
 @Entity(
         indices = [Index("venueId")],
@@ -283,13 +284,15 @@ data class VenuePhotos(
         constructor(venueId : String, url:String) : this(0,venueId, url)
 }
 
-
-
-
-
 ```
 
 #### @TypeConverters
+
+sometimes we may need to store object as is in one column rather than storing them in separate column as in case of @Embedded, so Type Converters comes to the rescue.
+
+Below is the the class which will tell Room how to convert ArrayList object to one of SQLite data type. We will implement methods to convert ArrayList to String for storing it in DB and String back to ArrayList for getting back original User object.
+
+Below is the code snappets where we convert String to Integer list and vice versa. basically table save this data as one of its primitive type rather than user object. 
 
 ```kotlin
 object VenueTypeConverters {
@@ -309,15 +312,27 @@ object VenueTypeConverters {
         return ints?.joinToString(",")
     }
 }
+
+
+Another example : 
+
+public class Converters {
+   @TypeConverter
+   public static ArrayList<String> fromString(String value) {
+      Type listType = new TypeToken<ArrayList<String>>() {}.getType();
+      return new Gson().fromJson(value, listType);
+   }
+   @TypeConverter
+   public static String fromArrayList(ArrayList<String> list) {
+      Gson gson = new Gson();
+      String json = gson.toJson(list);
+      return json;
+   }
+}
 ```
 
-
-
-
-
-
-
-
-
-
+Public static String fromArrayList(ArrayList<String> list) : 
+This method takes our arraylist object as parameter and returns string representation for it so that it can be stored in Room Database.  to make string, just creating Gson object and calling toJson method with our object as parameter is enough.
+ 
+public static ArrayList<String> fromString(String value) : While reading data back from Room Database, we get JSON form of our arraylist which we need to convert back. We will use Gson method fromJson by providing JSON string as parameter. But while converting back, we also need to provide the class of original object (in our case, arraylist), but providing arraylist is not enough here as Gson will not be able know what kind of list it has to form.
 
