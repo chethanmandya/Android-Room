@@ -70,10 +70,11 @@ Room creates a table for each class annotated with @Entity; the fields in the cl
  
 Now how do you save above json response ? 
 
-Note, keeping only what we needed : 
+Note keeping only what we needed : 
+
 It is really not necessary to have all of the information of venue object which comes from venue response, Creating a User Minimal object that holds only the data needed will improve the amount of memory used by the app. it is always recommended to load only the subset of fields what is needed for UI, that will improve the speed of the queries by reducing the IO cost. Hence I have considered below fields in the venue table.
 
-The following code snippet shows how to define an entity above json structure:
+The following code snippet shows how to define an entity for above json structure:
 
 ``` kotlin
 @Entity(
@@ -192,7 +193,7 @@ abstract class AppDatabase : RoomDatabase() {
 
 When you annotated field as Embedded, all of those nested field of annotated field will be created as a separate column in the same Entity. 
 
-Here location field has `address`, `lat` and `lng` nested field, all of those filed will be created as separated column in same entity Venue. 
+In the above Venu response, location field has `address`, `lat` and `lng` nested field, all of those filed will be created as separated column in same entity Venue. 
 
 ```kotlin
 @Entity(
@@ -219,11 +220,11 @@ data class Venue(
 ```
 #### foreignKeys
 
-if suppose, your field has an array list as one of the sub field then in that case you will save this field either by foreign key relation OR by type converters. 
+if suppose, your field contains nested list OR only list. we save this data field either by foreign key relation OR by type converters. 
 
 You will go for making it as foreign key relation when it has very complex structure, structure which has nested list. or you can save them using type convertor when it has only list of objects, like list of primitive type. 
 
-When you have more than one nested list, it is better to save them in foreign key relationship because type convertor is not best suitable, it will slow down performance because of too many traverses in the list while converting user object to primitive and vice versa. 
+When you have more than one nested list, it is better to save them in foreign key relationship because type convertor is not best fit for nested list, it will slow down performance because of too many traverses in the list while converting user object to primitive type and vice versa. 
 
 In the below example, Venue Details has a field called Photos, The Photos has nested list, it is a relation of 1 to Many. To map this type of relation we will use the @ForeignKey annotation. 
 
@@ -265,7 +266,7 @@ data class VenueDetails(
 }
 
 ```
-Below entity of VenuePhotos saves the Photo object information which we have ignored in VenueDetails. You can have your own version of entity to save Photo object element like "url". it is really not necessary to have complete Photo object with all other field when you are not using in the app. you can see in the below snappet we have considered parent entity as Venue Details and child entity as VenuePhotos. we are linking these two entities together by using parent column id in Venue and venueId child column id from VenuePhotos
+Below entity of VenuePhotos saves the Photo object information which we have ignored in VenueDetails. You can have your own version of entity to save Photo object element "url". it is really not necessary to have complete Photo object with all other fields when you are not using in the app. In the below snappet, we have considered parent entity as Venue Details and child entity as VenuePhotos. we are linking these two entities together by using parent column id in Venue and venueId child column id from VenuePhotos
 
 ``` kotlin 
 @Entity(
@@ -290,7 +291,7 @@ data class VenuePhotos(
 
 #### @TypeConverters
 
-sometimes we may need to store object as is in one column rather than storing them in separate column as in case of @Embedded, so Type Converters comes to the rescue.
+Sometimes we may need to store object as is in one column rather than storing them in separate column as in case of @Embedded, so Type converters comes to the rescue.
 
 Below is the the class which will tell Room how to convert ArrayList object to one of SQLite data type. We will implement methods to convert ArrayList to String for storing it in DB and String back to ArrayList for getting back original User object.
 
