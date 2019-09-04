@@ -68,11 +68,12 @@ Below example is json response gives you nearby venues which are available on fo
 #### @Entity : 
 Room creates a table for each class annotated with @Entity; the fields in the class correspond to columns in the table.
  
-Keeping only what we needed
- 
+Now how do you save above json response ? 
+
+Keeping only what we needed : 
 It is really not necessary to have all of the information of venue object which comes venue response, Creating a User Minimal object that holds only the data needed will improve the amount of memory used by the app. it is always recommended to load only the subset of fields what is needed for UI, that will improve the speed of the queries by reducing the IO cost. Hence I have considered below fields in the venue table.
 
-The following code snippet shows how to define an entity:
+The following code snippet shows how to define an entity above json structure:
 
 ``` kotlin
 @Entity(
