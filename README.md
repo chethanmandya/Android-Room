@@ -9,7 +9,7 @@ The Room persistence library provides an abstraction layer over SQLite. library 
 - It doesn't have compile time safety, if you building sqlite query and if you forgot to add comma, you going to get run time crash, that makes you very hard to test all those cases you put. 
 - When you are writing reactive application and you want to observe the databases changes to UI , sqlite doesn't facilitate to do that but Room is built to work with LiveData and RxJava for data observation.  
 
-I am not going to go too much on theoretical knowledge, if you have already used any of those sql wrapper like ORMLight, Realm, you will understand the advantages and disadvantages of having Room over any other library. Let me step into an example to make you understand how to use the room and its features. 
+I am not going to go too much on theoretical knowledge, if you have already used any of those sqllite wrapper like ORMLight, Realm, you will understand the advantages and disadvantages of having Room over any other library. Let me step into an example to make you understand how to use the room and its features. 
 
 There are 3 major components in Room:
  - Database: Contains the database holder and serves as the main access point for the underlying connection to your app's persisted, relational data.
@@ -17,7 +17,7 @@ There are 3 major components in Room:
  - DAO: Contains the methods used for accessing the database.
 
 
-Below example is json response gives you nearby venues which are available on foursquare apis. Assume your response look like as below. 
+Below example is json response gives you nearby venues which are available on foursquare apis. consider your response look like as below. 
 
 ```kotlin
  "venues": [
@@ -70,8 +70,8 @@ Room creates a table for each class annotated with @Entity; the fields in the cl
  
 Now how do you save above json response ? 
 
-Keeping only what we needed : 
-It is really not necessary to have all of the information of venue object which comes venue response, Creating a User Minimal object that holds only the data needed will improve the amount of memory used by the app. it is always recommended to load only the subset of fields what is needed for UI, that will improve the speed of the queries by reducing the IO cost. Hence I have considered below fields in the venue table.
+Note, keeping only what we needed : 
+It is really not necessary to have all of the information of venue object which comes from venue response, Creating a User Minimal object that holds only the data needed will improve the amount of memory used by the app. it is always recommended to load only the subset of fields what is needed for UI, that will improve the speed of the queries by reducing the IO cost. Hence I have considered below fields in the venue table.
 
 The following code snippet shows how to define an entity above json structure:
 
@@ -100,7 +100,8 @@ data class Venue(
 
 
 ### @Dao 
-DAOs are responsible for defining the methods that access the database.
+For every entity you should define Data access object (DAO), This class are responsible for defining the methods that access the database.
+
 Below code snippet shows how to define a Dao class for venu entity
 
 ```kotlin
