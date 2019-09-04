@@ -266,6 +266,7 @@ data class VenueDetails(
 ```
 Below entity of VenuePhotos saves the Photo object information which we have ignored in VenueDetails. You can have your own version of entity to save Photo object element like "url". it is really not necessary to have complete Photo object with all other field when you are not using in the app. you can see in the below snappet we have considered parent entity as Venue Details and child entity as VenuePhotos. we are linking these two entities together by using parent column id in Venue and venueId child column id from VenuePhotos
 
+``` kotlin 
 @Entity(
         indices = [Index("venueId")],
         foreignKeys = [ForeignKey(
@@ -312,10 +313,11 @@ object VenueTypeConverters {
         return ints?.joinToString(",")
     }
 }
-
+```
 
 Another example : 
 
+```kotlin
 object Converters {
         @TypeConverter
         fun fromString(value: String): ArrayList<String> {
