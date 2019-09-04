@@ -1,6 +1,8 @@
 
 #### What is Room ? 
-Room is a persistence library and it is part of jetpack.it is wrapper around sqlite that takes care most of complicated stuff that we previously had to do ourselves, we will write much less boilerplate code to create tables and make database operations.
+Room is a persistence library, it is part of jetpack. library takes care most of complicated stuff that we previously had to do ourselves, we will write much less boilerplate code to create tables and make database operations.
+
+It makes it easier to work with SQLiteDatabase objects in your app, decreasing the amount of boilerplate code and verifying SQL queries at compile time
 
 
 ### Sqlite in android is not that cool 
@@ -65,9 +67,9 @@ Below example is json response of near by venues which are available on foresqua
 ```
 
 #### @Entity : 
-Anotation entity create SQLLite table. To save above response, you create an entity as below.
+Room creates a table for each class annotated with @Entity; the fields in the class correspond to columns in the table.
  
- ***NOTE : Keeping only what we needed***
+Keeping only what we needed
  
 It is really not necessary to have all of the information of venue object which comes venue response, Creating a User Minimal object that holds only the data needed will improve the amount of memory used by the app. it is always recommended to load only the subset of fields what is needed for UI, that will improve the speed of the queries by reducing the IO cost. Hence I have consider below fields in the venue table.
 
@@ -98,7 +100,7 @@ data class Venue(
 
 
 ### @Dao 
-Data Access Objects are the main classes where you define your database interactions. They can include a variety of query methods. 
+DAOs are responsible for defining the methods that access the database.
 
 Below code snippet shows how to define an Dao class for your venu entity
 
@@ -165,7 +167,9 @@ abstract class VenueDao {
 
 
 #### @Database
+To create database we need to define an abstract class that extends RoomDatabase. This class is annotated with @Database, lists of entities contained in the database, and the DAOs which access them. The database version has to be increased by 1, from the initial value.
 
+Below code snippet shows how to define your database class
 
 ```kotlin
 @Database(
@@ -185,6 +189,10 @@ abstract class AppDatabase : RoomDatabase() {
 ```
 
 ####  @Embedded
+
+When you annotated field as Embedded, all of those nested field of annotated field will be referred as separate column in the same Entity. 
+
+Here location field has `address`, `lat` and `lng` nested field, all of those filed will be created as separated column in same entity Venue. 
 
 ```kotlin
 @Entity(
@@ -211,8 +219,11 @@ data class Venue(
 ```
 #### foreignKeys
 
-List of objects can be saved either through foreign key relation OR by type converters,
+if suppose, your field has array list as one of the sub field then you will save this field either by foreign key relation OR by type converters. 
 
+you will go for making it as foreign key relation when it has very complex structure, structure which has nested list within list. or else you go for type convertor when it has only list of objects, like list of premitive type. 
+
+In the below example, VenuDetails has a field called Photos, The Photos has nested list, it is a relation 1 to Many. To map this type of relation we will use the @ForeignKey annotation. 
 
 ``` kotlin 
 
@@ -239,14 +250,11 @@ data class VenueDetails(
         @field:Embedded(prefix = "location_")
         var location: Location?,
 
-        /*
-         Enforce constraints between entities with foreign keys to save photo objects.
-         List of objects can be saved either through foreign key relation OR by type converters,
-         Photo object json is more lengther and has complex structure, considering Type converter is not
-         best approach here, it will slow down performance.
-         */
+       /**
+        we are ignoring field because we going to hold this data by foreigh annotation
+       */
         @field:SerializedName("photos")
-        @Ignore
+        @Ignore                                  
         var photos: Photos?
 
 ) : Serializable {
@@ -254,8 +262,8 @@ data class VenueDetails(
 
 }
 
-
-
+```
+Below entity of VenuePhotos saves the Photo object information which we have igrnored in VenueDetails. You can have your own version of entity to save Photo object element like "url". it is really not necessary to have complete Photo object with all other field when you are not using in the app. you can see we have consider parent entity as VenuDetails and child entity as VenuePhotos. we are linking by using parent column id in the Venue and Child column venuId. 
 
 @Entity(
         indices = [Index("venueId")],
@@ -274,6 +282,10 @@ data class VenuePhotos(
 ) {
         constructor(venueId : String, url:String) : this(0,venueId, url)
 }
+
+
+
+
 
 ```
 
